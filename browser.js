@@ -118,12 +118,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 window.addEventListener('load', () => {
-  document.getElementById('react-root').addEventListener('contextmenu', (e) => {
+  document.addEventListener('contextmenu', (e) => {
     const targetName = e.target.className;
-    if (targetName === '_ovg3g') {
+    if (targetName === '_si7dy') {
       picCover(e);
     }
-    if (targetName === '_c2kdw') {
+    if (targetName === '_7thjo') {
       videoCover(e);
     }
   });
@@ -191,11 +191,11 @@ const download = (url, path) => new Promise((resolve, reject) => {
 
 const videoCover = (e) => {
   const target = e.target;
-  const trueTarget = target.previousSibling;
+  const trueTarget = target.previousSibling.previousSibling;
   const src = trueTarget.querySelectorAll('video')[0].src;
   const video = document.createElement('video');
   video.src = src;
-  video.style.width = '90%';
+  setImgDimension(video, trueTarget.querySelectorAll('img')[0]);
   video.setAttribute('autoplay', true);
   video.setAttribute('controls', true);
   const div = document.createElement('div');
@@ -207,12 +207,30 @@ const videoCover = (e) => {
   document.body.appendChild(div);
 };
 
+const setImgDimension = (target, imgSrc) => {
+  let img;
+  if (imgSrc) {
+    img = document.createElement('img');
+    img.src = imgSrc;
+  } else {
+    img = target;
+  }
+
+  let dim;
+  if ((img.width / img.height) > (window.innerWidth / window.innerHeight)) {
+    dim = 'width';
+  } else {
+    dim = 'height';
+  }
+  target.style[dim] = '90%';
+};
+
 const picCover = (e) => {
-  const trueTarget = e.target.previousSibling.previousSibling;
-  const src = trueTarget.querySelectorAll('img._icyx7')[0].src;
+  const trueTarget = e.target.previousSibling;
+  const src = trueTarget.querySelectorAll('img._2di5p')[0].src;
   const img = document.createElement('img');
   img.src = src;
-  img.style.width = '90%';
+  setImgDimension(img);
   img.style.cursor = 'pointer';
   const div = document.createElement('div');
   div.appendChild(img);
