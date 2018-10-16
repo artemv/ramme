@@ -66,6 +66,8 @@ function createMainWindow() {
   win.webContents.setUserAgent(userAgent);
   win.loadURL(`https://www.instagram.com`);
 
+  win.openDevTools({mode: 'detach'});
+
   win.on('close', e => {
     if (!isQuitting) {
       e.preventDefault();

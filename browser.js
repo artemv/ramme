@@ -120,10 +120,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
 window.addEventListener('load', () => {
   document.addEventListener('contextmenu', (e) => {
     const targetName = e.target.className;
-    if (targetName === '_si7dy') {
+    console.log('contextmenu', targetName);
+    if (targetName === '_9AhH0') {
       picCover(e);
     }
-    if (targetName === '_7thjo') {
+    if (targetName === 'QvAa1 ') {
       videoCover(e);
     }
   });
@@ -192,6 +193,7 @@ const download = (url, path) => new Promise((resolve, reject) => {
 const videoCover = (e) => {
   const target = e.target;
   const trueTarget = target.previousSibling.previousSibling;
+  console.log('videoCover', trueTarget);
   const src = trueTarget.querySelectorAll('video')[0].src;
   const video = document.createElement('video');
   video.src = src;
@@ -227,7 +229,7 @@ const setImgDimension = (target, imgSrc) => {
 
 const picCover = (e) => {
   const trueTarget = e.target.previousSibling;
-  const src = trueTarget.querySelectorAll('img._2di5p')[0].src;
+  const src = trueTarget.querySelectorAll('img')[0].src;
   const img = document.createElement('img');
   img.src = src;
   setImgDimension(img);
