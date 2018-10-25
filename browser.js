@@ -1,6 +1,9 @@
 'use strict';
+const path = require('path');
+const nanoid = require('nanoid');
 const https = require('https');
 const fs = require('fs');
+const os = require('os');
 const electron = require('electron');
 const { dialog } = require('electron').remote;
 const config = require('./config');
@@ -119,14 +122,23 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 window.addEventListener('load', () => {
   document.addEventListener('contextmenu', (e) => {
-    const targetName = e.target.className;
-    console.log('contextmenu', targetName);
-    if (targetName === '_9AhH0') {
-      picCover(e);
+    console.log('contextmenu', e.target);
+    let target = e.target;
+
+    if (target.nodeName == 'BUTTON') {
+      if (!target.parentElement || !target.parentElement.parentElement ||
+        !target.parentElement.parentElement.parentElement) {
+
+        return;
+      }
+      target = target.parentElement.parentElement.parentElement;
+      return videoCover(target, {trueTarget: true}) || picCover(target, {trueTarget: true});
+    } else {
+      if (!videoCover(e.target)) {
+        picCover(e.target);
+      }
     }
-    if (targetName === 'QvAa1 ') {
-      videoCover(e);
-    }
+
   });
 });
 
@@ -139,7 +151,7 @@ const savePicOrVideo = (src, fileType) => {
   const title = `save ${fileType}`;
   const options = {
     title,
-    defaultPath: __dirname,
+    defaultPath: path.join(os.homedir(), 'Downloads', nanoid(6))
   };
   const choosePath = dialog.showSaveDialog(options);
   if (choosePath) {
@@ -158,7 +170,11 @@ const savePicOrVideo = (src, fileType) => {
           icon: './static/icon.png'
         };
         const notification = new Notification(title, notificationOptions);
-        notification();
+        try {
+          // notification();
+        } catch (e) {
+          console.error('error notifying', e);
+        }
       });
   }
 };
@@ -190,11 +206,34 @@ const download = (url, path) => new Promise((resolve, reject) => {
   });
 });
 
-const videoCover = (e) => {
-  const target = e.target;
-  const trueTarget = target.previousSibling.previousSibling;
+const videoCover = (target, options = {}) => {
+  let trueTarget;
+  if (options.trueTarget) {
+    trueTarget = target;
+  } else {
+    if (!target.previousSibling) {
+      return;
+    }
+    trueTarget = target.previousSibling.previousSibling;
+  }
   console.log('videoCover', trueTarget);
-  const src = trueTarget.querySelectorAll('video')[0].src;
+  if (!trueTarget) {
+    return;
+  }
+  const videoEl = trueTarget.querySelectorAll('video')[0];
+  if (!videoEl) {
+    return;
+  }
+  let src;
+  if (!videoEl.src) {
+    let sourceEl = videoEl.querySelectorAll('source')[0];
+    if (!sourceEl) {
+      return;
+    }
+    src = sourceEl.src;
+  } else {
+    src = videoEl.src;
+  }
   const video = document.createElement('video');
   video.src = src;
   setImgDimension(video, trueTarget.querySelectorAll('img')[0]);
@@ -204,9 +243,10 @@ const videoCover = (e) => {
   div.appendChild(video);
   div.className = 'electron_pic_cover';
   document.body.style.overflow = 'hidden';
-  video.addEventListener('click', () => removeCover(div));
-  video.addEventListener('contextmenu', () => savePicOrVideo(src, 'mp4'));
+  video.addEventListener('click', () => savePicOrVideo(src, 'mp4'));
+  div.addEventListener('click', () => removeCover(div));
   document.body.appendChild(div);
+  return true;
 };
 
 const setImgDimension = (target, imgSrc) => {
@@ -227,9 +267,17 @@ const setImgDimension = (target, imgSrc) => {
   target.style[dim] = '90%';
 };
 
-const picCover = (e) => {
-  const trueTarget = e.target.previousSibling;
-  const src = trueTarget.querySelectorAll('img')[0].src;
+const picCover = (target, options = {}) => {
+  const trueTarget = options.trueTarget ? target : target.previousSibling;
+  if (!trueTarget) {
+    return;
+  }
+  console.log('picCover', trueTarget);
+  const imgEl = trueTarget.querySelectorAll('img')[0];
+  if (!imgEl || !imgEl.src) {
+    return;
+  }
+  const src = imgEl.src;
   const img = document.createElement('img');
   img.src = src;
   setImgDimension(img);
@@ -238,7 +286,8 @@ const picCover = (e) => {
   div.appendChild(img);
   div.className = 'electron_pic_cover';
   document.body.style.overflow = 'hidden';
-  img.addEventListener('click', () => removeCover(div));
-  img.addEventListener('contextmenu', () => savePicOrVideo(src, 'jpg'));
+  div.addEventListener('click', () => removeCover(div));
+  img.addEventListener('click', () => savePicOrVideo(src, 'jpg'));
   document.body.appendChild(div);
+  return true;
 };
