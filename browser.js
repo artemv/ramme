@@ -169,12 +169,7 @@ const savePicOrVideo = (src, fileType) => {
           body,
           icon: './static/icon.png'
         };
-        const notification = new Notification(title, notificationOptions);
-        try {
-          // notification();
-        } catch (e) {
-          console.error('error notifying', e);
-        }
+        new Notification(title, notificationOptions);
       });
   }
 };
